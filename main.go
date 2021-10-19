@@ -85,7 +85,7 @@ func main() {
 	//	勿論サニタイズ後の作業ファイルは別名保存している。
 	//	全てのファイルにおいて同じことが言えるが、別に同じファイル名でもよかった気がする
 
-	sanitizeFile, err := os.Create("./viptext.sinitize.html")
+	sanitizeFile, err := os.Create("./viptext.sanitize.html")
 	if err != nil {
 		log.Fatal(err)
 	}
