@@ -15,54 +15,28 @@ import (
 	"golang.org/x/text/transform"
 )
 
-//	URL管理外部ファイル化に伴い、複数の作業用ファイル名を一元管理するためにconst宣言
-
 //	iframe内のURLを指定しないとスクレイピングがうまく動かないので適宜修正必要
 //	引数にURL or 外部テキストファイルにURLを置いておく事で管理のしやすさ、
 //	バイナリで鯖に投げた後のメンテナンス性が向上する
 //	[TODO]URL管理の外部化
+const url = "http://dawnlight.ovh/test/read.cgi/viptext/1597046459"
 
 func main() {
 
-	htmlURLS := "./viptext.txt"
-	htmlSJIS := "./viptext.sjis.html"
-	htmlUTF8 := "./viptext.utf8.html"
-	htmlEDIT := "./viptext.sinitize.html"
 	//	ファイル取得して、ファイル書き出し処理。
 	//	変数:urlからnet/http経由で「viptext.sjis.html」を書き出す
 	//	この時点ではまだsjisでファイルエンコードがかかっているため直接的には
 	//	ファイルが文字化けして読めない
-	req, _ := http.NewRequest("GET", htmlURLS, nil)
-	client := new(http.Client)
-	resp, _ := client.Do(req)
-	defer func() {
-		err := recover()
-		if err != nil {
-			fmt.Println("Recover!: ", err)
-		}
-
-	}()
-
-	defer resp.Body.Close()
-
+	resp, _ := http.Get(url)
+	filename := "viptext.sjis.html"
 	body, _ := ioutil.ReadAll(resp.Body)
-	/*
-		resp, _ := http.Get(htmlURLS)
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	*/
+	defer resp.Body.Close()
 	writeBody := []byte(body)
-	err := os.WriteFile(htmlSJIS, writeBody, 0664)
+	err := ioutil.WriteFile(filename, writeBody, 0664)
 	if err != nil {
 		fmt.Println(err)
 	}
-	sjisFile, err := os.Open(htmlSJIS)
+	sjisFile, err := os.Open("./viptext.sjis.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +48,7 @@ func main() {
 
 	//	書き込み先ファイルを用意
 	//	エンコードしたファイルをこの場所でファイル名を変え保存している。
-	utf8File, err := os.Create(htmlUTF8)
+	utf8File, err := os.Create("./viptext.uft8.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,7 +69,7 @@ func main() {
 	//	bluemondayが一番キレイにファイルを処理してくれているので
 	//	現状はここでパーサーを通すために先程閉じたファイルをここで再度開きなおしている。
 	//	メモリ管理上たぶん此処は要改善だと思われる。
-	file, err := os.OpenFile(htmlUTF8, os.O_RDWR, 0664) // For read access.
+	file, err := os.OpenFile("./viptext.uft8.html", os.O_RDWR, 0664) // For read access.
 	fmt.Println("file Opens!!!")
 	if err != nil {
 		log.Fatal(err)
@@ -111,7 +85,7 @@ func main() {
 	//	勿論サニタイズ後の作業ファイルは別名保存している。
 	//	全てのファイルにおいて同じことが言えるが、別に同じファイル名でもよかった気がする
 
-	sanitizeFile, err := os.Create(htmlEDIT)
+	sanitizeFile, err := os.Create("./viptext.sinitize.html")
 	if err != nil {
 		log.Fatal(err)
 	}
