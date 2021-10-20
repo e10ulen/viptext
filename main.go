@@ -23,10 +23,16 @@ const url = "http://dawnlight.ovh/test/read.cgi/viptext/1597046459"
 
 func main() {
 
-	//	ファイル取得して、ファイル書き出し処理。
-	//	変数:urlからnet/http経由で「viptext.sjis.html」を書き出す
-	//	この時点ではまだsjisでファイルエンコードがかかっているため直接的には
-	//	ファイルが文字化けして読めない
+	fileDown()
+
+}
+
+//	ファイル取得して、ファイル書き出し処理。
+//	変数:urlからnet/http経由で「viptext.sjis.html」を書き出す
+//	この時点ではまだsjisでファイルエンコードがかかっているため直接的には
+//	ファイルが文字化けして読めない
+
+func fileDown() {
 	resp, _ := http.Get(url)
 	filename := "viptext.sjis.html"
 	body, _ := ioutil.ReadAll(resp.Body)
@@ -42,12 +48,18 @@ func main() {
 	}
 	defer sjisFile.Close()
 
-	//	ShiftJISのデコーダーを噛ませたReaderを作成する。
-	//	この場所でエンコードをShift_JISに変更するためデコーダを生成する
+	encodingSJIStoUTF8(sjisFile)
+
+}
+
+//	ShiftJISのデコーダーを噛ませたReaderを作成する。
+//	この場所でエンコードをShift_JISに変更するためデコーダを生成する
+//	書き込み先ファイルを用意
+//	エンコードしたファイルをこの場所でファイル名を変え保存している。
+
+func encodingSJIStoUTF8(sjisFile *os.File) {
 	reader := transform.NewReader(sjisFile, japanese.ShiftJIS.NewDecoder())
 
-	//	書き込み先ファイルを用意
-	//	エンコードしたファイルをこの場所でファイル名を変え保存している。
 	utf8File, err := os.Create("./viptext.uft8.html")
 	if err != nil {
 		log.Fatal(err)
@@ -64,11 +76,17 @@ func main() {
 	}
 	log.Println("done")
 
-	//	ここから先でパーサーを通す事
-	//	いくつかパーサーをテストした結果、昔触った
-	//	bluemondayが一番キレイにファイルを処理してくれているので
-	//	現状はここでパーサーを通すために先程閉じたファイルをここで再度開きなおしている。
-	//	メモリ管理上たぶん此処は要改善だと思われる。
+	parserUTF8toSANITIZE()
+
+}
+
+//	ここから先でパーサーを通す事
+//	いくつかパーサーをテストした結果、昔触った
+//	bluemondayが一番キレイにファイルを処理してくれているので
+//	現状はここでパーサーを通すために先程閉じたファイルをここで再度開きなおしている。
+//	メモリ管理上たぶん此処は要改善だと思われる。
+
+func parserUTF8toSANITIZE() {
 	file, err := os.OpenFile("./viptext.uft8.html", os.O_RDWR, 0664) // For read access.
 	fmt.Println("file Opens!!!")
 	if err != nil {
@@ -93,33 +111,11 @@ func main() {
 
 	// 書き込み
 	teesanitize := io.TeeReader(doc, sanitizeFile)
-	docs := bufio.NewScanner(teesanitize)
-	for docs.Scan() {
+	s := bufio.NewScanner(teesanitize)
+	for s.Scan() {
 	}
 	if err := s.Err(); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Sanitize done")
-	/*
-			//	過去の産物
-		   //	goquery
-		   	doc, err := goquery.NewDocumentFromReader(file)
-
-		   	if err != nil {
-		   		log.Fatal(err)
-		   	}
-		   	doc.Find("table > dl > dd").Each(func(i int, s *goquery.Selection) {
-		   		band := s.Find("a").Text()
-		   		urls, _ := s.Attr("href")
-		   		fmt.Println("URLs: %s", urls)
-		   		fmt.Println("SiteTitle: %s", band)
-
-		   	})
-		   //	html2text
-		   		text, err := html2text.FromString(string(file), html2text.Options{PrettyTables: true})
-		   		if err != nil {
-		   			panic(err)
-		   		}
-		   		fmt.Println(text)
-	*/
 }
