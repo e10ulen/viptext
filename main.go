@@ -19,14 +19,16 @@ import (
 //	引数にURL or 外部テキストファイルにURLを置いておく事で管理のしやすさ、
 //	バイナリで鯖に投げた後のメンテナンス性が向上する
 //	[TODO]URL管理の外部化
-const url = "http://dawnlight.ovh/test/read.cgi/viptext/1597046459"
-const filesjis = "./viptext.sjis.html"
-const fileutf8 = "./viptext.utf8.htnl"
-const filesanitize = "./viptext.sanitize.html"
+const (
+	url          = "http://dawnlight.ovh/test/read.cgi/viptext/1597046459"
+	filesjis     = "./viptext.sjis.html"
+	fileutf8     = "./viptext.utf8.html"
+	filesanitize = "./viptext.sanitize.html"
+)
 
 func main() {
 
-	fileDown(fileutf8, filesjis)
+	fileDown(url, fileutf8, filesjis)
 
 	utf8toSANITIZE(filesanitize, fileutf8)
 
@@ -37,7 +39,7 @@ func main() {
 //	この時点ではまだsjisでファイルエンコードがかかっているため直接的には
 //	ファイルが文字化けして読めない
 
-func fileDown(fileutf8 string, filesjis string) {
+func fileDown(url string, fileutf8 string, filesjis string) {
 	resp, _ := http.Get(url)
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
