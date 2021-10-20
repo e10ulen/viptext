@@ -20,10 +20,15 @@ import (
 //	バイナリで鯖に投げた後のメンテナンス性が向上する
 //	[TODO]URL管理の外部化
 const url = "http://dawnlight.ovh/test/read.cgi/viptext/1597046459"
+const filesjis = "./viptext.sjis.html"
+const fileutf8 = "./viptext.utf8.htnl"
+const filesanitize = "./viptext.sanitize.html"
 
 func main() {
 
-	fileDown()
+	fileDown(fileutf8, filesjis)
+
+	utf8toSANITIZE(filesanitize, fileutf8)
 
 }
 
@@ -32,24 +37,22 @@ func main() {
 //	この時点ではまだsjisでファイルエンコードがかかっているため直接的には
 //	ファイルが文字化けして読めない
 
-func fileDown() {
+func fileDown(fileutf8 string, filesjis string) {
 	resp, _ := http.Get(url)
-	filename := "viptext.sjis.html"
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	writeBody := []byte(body)
-	err := ioutil.WriteFile(filename, writeBody, 0664)
+	err := ioutil.WriteFile(filesjis, writeBody, 0664)
 	if err != nil {
 		fmt.Println(err)
 	}
-	sjisFile, err := os.Open("./viptext.sjis.html")
+	sjisFile, err := os.Open(filesjis)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer sjisFile.Close()
 
-	encodingSJIStoUTF8(sjisFile)
-
+	encodingSJIStoUTF8(fileutf8, sjisFile)
 }
 
 //	ShiftJISのデコーダーを噛ませたReaderを作成する。
@@ -57,10 +60,10 @@ func fileDown() {
 //	書き込み先ファイルを用意
 //	エンコードしたファイルをこの場所でファイル名を変え保存している。
 
-func encodingSJIStoUTF8(sjisFile *os.File) {
+func encodingSJIStoUTF8(fileutf8 string, sjisFile *os.File) {
 	reader := transform.NewReader(sjisFile, japanese.ShiftJIS.NewDecoder())
 
-	utf8File, err := os.Create("./viptext.uft8.html")
+	utf8File, err := os.Create(fileutf8)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,8 +79,6 @@ func encodingSJIStoUTF8(sjisFile *os.File) {
 	}
 	log.Println("done")
 
-	parserUTF8toSANITIZE()
-
 }
 
 //	ここから先でパーサーを通す事
@@ -86,8 +87,8 @@ func encodingSJIStoUTF8(sjisFile *os.File) {
 //	現状はここでパーサーを通すために先程閉じたファイルをここで再度開きなおしている。
 //	メモリ管理上たぶん此処は要改善だと思われる。
 
-func parserUTF8toSANITIZE() {
-	file, err := os.OpenFile("./viptext.uft8.html", os.O_RDWR, 0664) // For read access.
+func utf8toSANITIZE(filesanitize string, fileutf8 string) {
+	file, err := os.OpenFile(fileutf8, os.O_RDWR, 0664) // For read access.
 	fmt.Println("file Opens!!!")
 	if err != nil {
 		log.Fatal(err)
@@ -103,7 +104,7 @@ func parserUTF8toSANITIZE() {
 	//	勿論サニタイズ後の作業ファイルは別名保存している。
 	//	全てのファイルにおいて同じことが言えるが、別に同じファイル名でもよかった気がする
 
-	sanitizeFile, err := os.Create("./viptext.sanitize.html")
+	sanitizeFile, err := os.Create(filesanitize)
 	if err != nil {
 		log.Fatal(err)
 	}
