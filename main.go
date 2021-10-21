@@ -27,12 +27,16 @@ const (
 	filesanitize = "./viptext.sanitize.html"
 )
 
+//	kingpin.v2で引数を受け付けるための変数宣言
 var (
 	Cmd = kingpin.CommandLine
-	//debug = Cmd.Flag("debug", "Enable").String()
+	//	起動時は--urlsで起動しないと動かない
+	//	この時、URLを文字列として要求しているため、
+	//	README.mdの実行処理の通りに実行する
 	url = Cmd.Flag("urls", "http urls").String()
 )
 
+//	kingpinの初期処理
 func init() {
 	Cmd.Name = "ViP de TextSite"
 	Cmd.Help = "VTS portal"
@@ -49,11 +53,11 @@ func main() {
 		log.Fatalf("!!%v", err)
 	}
 
-	//fileDown(url, fileutf8, filesjis)
-
 	utf8toSANITIZE(filesanitize, fileutf8)
 
 }
+
+//	kingpin起動処理
 func run() error {
 	url := *url
 	fmt.Println(url)
