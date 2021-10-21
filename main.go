@@ -13,6 +13,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 //	iframe内のURLを指定しないとスクレイピングがうまく動かないので適宜修正必要
@@ -20,18 +21,45 @@ import (
 //	バイナリで鯖に投げた後のメンテナンス性が向上する
 //	[TODO]URL管理の外部化
 const (
-	url          = "http://dawnlight.ovh/test/read.cgi/viptext/1597046459"
+	//	url          = "http://dawnlight.ovh/test/read.cgi/viptext/1597046459"
 	filesjis     = "./viptext.sjis.html"
 	fileutf8     = "./viptext.utf8.html"
 	filesanitize = "./viptext.sanitize.html"
 )
 
-func main() {
+var (
+	Cmd = kingpin.CommandLine
+	//debug = Cmd.Flag("debug", "Enable").String()
+	url = Cmd.Flag("urls", "http urls").String()
+)
 
-	fileDown(url, fileutf8, filesjis)
+func init() {
+	Cmd.Name = "ViP de TextSite"
+	Cmd.Help = "VTS portal"
+	Cmd.Version("0.0.1")
+}
+
+func main() {
+	//	kingpin実行処理
+	_, err := Cmd.Parse(os.Args[1:])
+	if err != nil {
+		Cmd.FatalUsage(fmt.Sprintf("\x1b[33m%v\x1b[0m", err))
+	}
+	if err := run(); err != nil {
+		log.Fatalf("!!%v", err)
+	}
+
+	//fileDown(url, fileutf8, filesjis)
 
 	utf8toSANITIZE(filesanitize, fileutf8)
 
+}
+func run() error {
+	url := *url
+	fmt.Println(url)
+	fileDown(url, fileutf8, filesjis)
+
+	return nil
 }
 
 //	ファイル取得して、ファイル書き出し処理。
