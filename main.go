@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"bufio"
 	"fmt"
@@ -54,6 +55,9 @@ func main() {
 	}
 
 	utf8toSANITIZE(filesanitize, fileutf8)
+	//	HTML化処理を行う
+	//	現在実装途中で動かすとサニタイズしたファイル内容が吹っ飛ぶ
+	htmlParse()
 
 }
 
@@ -131,7 +135,7 @@ func utf8toSANITIZE(filesanitize string, fileutf8 string) {
 	//	bluemondayにはプログラム作成者がポリシーを作ることができる。
 	//	それを活用して、通すHTMLタグを決め、ポリシーを通してサニタイズしている。
 	policy := bluemonday.NewPolicy()
-	policy.AllowElements("dd")
+	policy.AllowElements("dd", "a")
 	doc := policy.SanitizeReader(file)
 	fmt.Println(doc)
 	// 書き込み先ファイルを用意
@@ -153,4 +157,45 @@ func utf8toSANITIZE(filesanitize string, fileutf8 string) {
 		log.Fatal(err)
 	}
 	log.Println("Sanitize done")
+}
+
+/*
+	ファイルを開いて、replaceで<dd>と</dd>を削除する。
+	あと、レス番号、>>1の行を削除（名無しの先行者）の行
+	<dd> !サンプルサイト\これはサンプルです  http://example.com/example.html テストテキスト</dd>
+	これをこうしてしたい
+	<a href="http://example.com/example.html" target="_blank">サンプルサイト｜これはサンプルです</a><br />
+
+*/
+func htmlParse() {
+
+	file, err := os.Create("viptext.sanitize.html")
+	if err != nil {
+		log.Println("file Read error")
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		log.Println(err)
+	}
+
+	data := make([]byte, info.Size())
+	count, err := file.Read(data)
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println(strings.ReplaceAll(string(data[:count]), "<dd> !", "<a name='"))
+	fmt.Println(strings.ReplaceAll(string(data[:count]), "\\", "|"))
+	fmt.Println(strings.ReplaceAll(string(data[:count]), "\n", "' href='"))
+
+	/* 書き込み
+	teesanitize := io.TeeReader(doc, file)
+	s := bufio.NewScanner(teesanitize)
+	for s.Scan() {
+	}
+	if err := s.Err(); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Sanitize done")
+	*/
 }
