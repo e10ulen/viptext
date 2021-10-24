@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"bufio"
 	"fmt"
@@ -57,7 +56,8 @@ func main() {
 	utf8toSANITIZE(filesanitize, fileutf8)
 	//	HTML化処理を行う
 	//	現在実装途中で動かすとサニタイズしたファイル内容が吹っ飛ぶ
-	htmlParse()
+
+	//	htmlParse()
 
 }
 
@@ -166,7 +166,6 @@ func utf8toSANITIZE(filesanitize string, fileutf8 string) {
 	これをこうしてしたい
 	<a href="http://example.com/example.html" target="_blank">サンプルサイト｜これはサンプルです</a><br />
 
-*/
 func htmlParse() {
 
 	file, err := os.Create("viptext.sanitize.html")
@@ -184,11 +183,20 @@ func htmlParse() {
 	if err != nil {
 		log.Println(err)
 	}
+
+	//	URL正規表現
+	//	https?://[\w/:%#\$&\?\(\)~\.=\+\-]+
+	//	http://www.google.co.jp/search?hl=ja&q=%U&lr=
+	//	or
+	//	 regexp.MustCompile("http(.*)://([a-z]+)/([a-z]+)/([a-zA-Z0-9]+)")
+	//	http://example.com/example.html
+	//	通るのであれば上の正規表現で精査を賭けた方がいい
+
 	fmt.Println(strings.ReplaceAll(string(data[:count]), "<dd> !", "<a name='"))
 	fmt.Println(strings.ReplaceAll(string(data[:count]), "\\", "|"))
 	fmt.Println(strings.ReplaceAll(string(data[:count]), "\n", "' href='"))
 
-	/* 書き込み
+//	 書き込み
 	teesanitize := io.TeeReader(doc, file)
 	s := bufio.NewScanner(teesanitize)
 	for s.Scan() {
@@ -197,5 +205,6 @@ func htmlParse() {
 		log.Fatal(err)
 	}
 	log.Println("Sanitize done")
-	*/
+
 }
+*/
