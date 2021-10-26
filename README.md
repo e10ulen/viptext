@@ -51,3 +51,5 @@ viptext.sanitize.html
 > あとは切り捨てで処理できればいいんだけどね
 > <a href="https://twitter.com/e10ulen/status/1453004195943026699?ref_src=twsrc%5Etfw">乗っ取り食らった依藤 (@e10ulen) October 26, 2021</a>
 
+##### Special Thanks
+[つまがき](http://svr.cybergence.net/)
