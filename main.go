@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"bufio"
@@ -177,25 +178,14 @@ func htmlParse() {
 	if err != nil {
 		log.Println(err)
 	}
-
-	data := make([]byte, info.Size())
-	count, err := file.Read(data)
-	if err != nil {
-		log.Println(err)
-	}
-	scanner := bufio.NewScanner(file)
-	//	Write
-	doc, err := os.Create("viptext.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-		doc.WriteString(strings.ReplaceAll(string(scanner.Text()), "<dd> !", "<a name='"))
-		doc.WriteString(strings.ReplaceAll(string(scanner.Text()), "\\", "|"))
-		doc.WriteString(strings.ReplaceAll(string(scanner.Text()), "\n", "' href='"))
-		count += 1
-	}
+//	URL用正規表現
+	rURL, _ := regexp.Compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
+//	サイトタイトル用正規表現
+	rTitle, _ := regexp.Compile("")
+//	Discription用正規表現
+	rDiscs, _ := regexp.Compile("")
+	//	リプレースの定義づくり
+	rep := strings.NewReplacer("<dd>", "<a target='_blank' href='", rURL, rURL+"'", "\\"/* ←ここにタイトルの正規表現を取る */)
 
 	//	URL正規表現
 	//	https?://[\w/:%#\$&\?\(\)~\.=\+\-]+
