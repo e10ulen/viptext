@@ -2,3 +2,4 @@
 *.html
 .vscode
 viptext
+*.copy*
