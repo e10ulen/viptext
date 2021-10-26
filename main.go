@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
 
 	"bufio"
 	"fmt"
@@ -27,6 +26,7 @@ const (
 	filesjis     = "./viptext.sjis.html"
 	fileutf8     = "./viptext.utf8.html"
 	filesanitize = "./viptext.sanitize.html"
+	fileregexp   = "./viptext.regexp.html"
 )
 
 //	kingpin.v2で引数を受け付けるための変数宣言
@@ -174,18 +174,28 @@ func htmlParse() {
 		log.Println("file Read error")
 	}
 	defer file.Close()
-	info, err := file.Stat()
+
+	//	URL用正規表現
+	rURL := regexp.MustCompile(`^\s+<dd>\s\!(.*)\\(.*)\s{2}(http.*[a-zA-Z0-9!-/:-@\[{-~_\\^\]])\s{2}(.*)\s<\/dd>$`)
+	//rURL, _ := regexp.Compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
+	//regfile, err := os.Create(fileregexp)
+	//writer := bufio.NewWriter(regfile)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 	}
-//	URL用正規表現
-	rURL, _ := regexp.Compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
-//	サイトタイトル用正規表現
-	rTitle, _ := regexp.Compile("")
-//	Discription用正規表現
-	rDiscs, _ := regexp.Compile("")
-	//	リプレースの定義づくり
-	rep := strings.NewReplacer("<dd>", "<a target='_blank' href='", rURL, rURL+"'", "\\"/* ←ここにタイトルの正規表現を取る */)
+	r := bufio.NewReader(file)
+	for {
+		// line includes '\n'.
+		line, err := r.ReadString('\n')
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+		}
+		//fmt.Println(line)
+		fmt.Println(rURL.ReplaceAllString(line, ""))
+
+	}
 
 	//	URL正規表現
 	//	https?://[\w/:%#\$&\?\(\)~\.=\+\-]+

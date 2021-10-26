@@ -42,3 +42,5 @@ viptext.sanitize.html
 エンコードを変えただけの生データ  
 サニタイズを行って必要な個所だけ残した加工一段階目のデータ  
 
+<blockquote class="twitter-tweet" data-partner="tweetdeck"><p lang="ja" dir="ltr">正規表現で検出したやつを次々にスライスに突っ込む…？<br>1個目サイトタイトル<br>2個目記事タイトル<br>改行挟んで<br>3個目URL<br>あとは切り捨てで処理できればいいんだけどね</p>&mdash; 乗っ取り食らった依藤 (@e10ulen) <a href="https://twitter.com/e10ulen/status/1453004195943026699?ref_src=twsrc%5Etfw">October 26, 2021</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
