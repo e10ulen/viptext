@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"bufio"
 	"fmt"
@@ -56,8 +57,7 @@ func main() {
 	utf8toSANITIZE(filesanitize, fileutf8)
 	//	HTML化処理を行う
 	//	現在実装途中で動かすとサニタイズしたファイル内容が吹っ飛ぶ
-
-	//	htmlParse()
+	htmlParse()
 
 }
 
@@ -165,10 +165,10 @@ func utf8toSANITIZE(filesanitize string, fileutf8 string) {
 	目標物：<dd> !サンプルサイト\これはサンプルです  http://example.com/example.html テストテキスト</dd>
 	これをこうしてしたい
 	成果物：<a href="http://example.com/example.html" target="_blank">サンプルサイト｜これはサンプルです</a><br />
-
+*/
 func htmlParse() {
-
-	file, err := os.Create("viptext.sanitize.html")
+	//	Open
+	file, err := os.OpenFile("viptext.sanitize.html", os.O_RDWR, 0664)
 	if err != nil {
 		log.Println("file Read error")
 	}
@@ -183,6 +183,19 @@ func htmlParse() {
 	if err != nil {
 		log.Println(err)
 	}
+	scanner := bufio.NewScanner(file)
+	//	Write
+	doc, err := os.Create("viptext.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+		doc.WriteString(strings.ReplaceAll(string(scanner.Text()), "<dd> !", "<a name='"))
+		doc.WriteString(strings.ReplaceAll(string(scanner.Text()), "\\", "|"))
+		doc.WriteString(strings.ReplaceAll(string(scanner.Text()), "\n", "' href='"))
+		count += 1
+	}
 
 	//	URL正規表現
 	//	https?://[\w/:%#\$&\?\(\)~\.=\+\-]+
@@ -191,20 +204,15 @@ func htmlParse() {
 	//	 regexp.MustCompile("http(.*)://([a-z]+)/([a-z]+)/([a-zA-Z0-9]+)")
 	//	http://example.com/example.html
 	//	通るのであれば上の正規表現で精査を掛けた方がいい
-
-	fmt.Println(strings.ReplaceAll(string(data[:count]), "<dd> !", "<a name='"))
-	fmt.Println(strings.ReplaceAll(string(data[:count]), "\\", "|"))
-	fmt.Println(strings.ReplaceAll(string(data[:count]), "\n", "' href='"))
-
-//	 書き込み
-	teesanitize := io.TeeReader(doc, file)
-	s := bufio.NewScanner(teesanitize)
-	for s.Scan() {
-	}
-	if err := s.Err(); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Sanitize done")
-
+	/*
+		//	 書き込み
+		teesanitize := io.TeeReader(doc, file)
+		s := bufio.NewScanner(teesanitize)
+		for s.Scan() {
+		}
+		if err := s.Err(); err != nil {
+			log.Fatal(err)
+		}
+		log.Println("Sanitize done")
+	*/
 }
-*/
