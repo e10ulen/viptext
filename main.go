@@ -162,9 +162,9 @@ func utf8toSANITIZE(filesanitize string, fileutf8 string) {
 /*
 	ファイルを開いて、replaceで<dd>と</dd>を削除する。
 	あと、レス番号、>>1の行を削除（名無しの先行者）の行
-	<dd> !サンプルサイト\これはサンプルです  http://example.com/example.html テストテキスト</dd>
+	目標物：<dd> !サンプルサイト\これはサンプルです  http://example.com/example.html テストテキスト</dd>
 	これをこうしてしたい
-	<a href="http://example.com/example.html" target="_blank">サンプルサイト｜これはサンプルです</a><br />
+	成果物：<a href="http://example.com/example.html" target="_blank">サンプルサイト｜これはサンプルです</a><br />
 
 func htmlParse() {
 
@@ -190,7 +190,7 @@ func htmlParse() {
 	//	or
 	//	 regexp.MustCompile("http(.*)://([a-z]+)/([a-z]+)/([a-zA-Z0-9]+)")
 	//	http://example.com/example.html
-	//	通るのであれば上の正規表現で精査を賭けた方がいい
+	//	通るのであれば上の正規表現で精査を掛けた方がいい
 
 	fmt.Println(strings.ReplaceAll(string(data[:count]), "<dd> !", "<a name='"))
 	fmt.Println(strings.ReplaceAll(string(data[:count]), "\\", "|"))
