@@ -1,5 +1,4 @@
-*.txt
-*.html
 .vscode
-viptext
+viptext.*
 *.copy*
+viptext

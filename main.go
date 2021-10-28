@@ -176,7 +176,8 @@ func htmlParse() {
 	defer file.Close()
 
 	//	URL用正規表現
-	rURL := regexp.MustCompile(`^\s+<dd>\s\!(.*)\\(.*)\s{2}(http.*[a-zA-Z0-9!-/:-@\[{-~_\\^\]])\s{2}(.*)\s<\/dd>$`)
+	//rURL := regexp.MustCompile(`^\s+<dd>\s\!(.*)\\(.*)\s{2}(http.*[a-zA-Z0-9!-/:-@\[{-~_\\^\]])\s{2}(.*)\s<\/dd>$`)
+	ddsearch := regexp.MustCompile(`<dd>.*</dd>`)
 	//rURL, _ := regexp.Compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
 	//regfile, err := os.Create(fileregexp)
 	//writer := bufio.NewWriter(regfile)
@@ -184,6 +185,9 @@ func htmlParse() {
 		log.Fatal(err)
 	}
 	r := bufio.NewReader(file)
+
+	links := []string{}
+
 	for {
 		// line includes '\n'.
 		line, err := r.ReadString('\n')
@@ -192,9 +196,26 @@ func htmlParse() {
 		} else if err != nil {
 			log.Fatal(err)
 		}
-		//fmt.Println(line)
-		fmt.Println(rURL.ReplaceAllString(line, ""))
+		//	appendする場所
+		links = append(links, ddsearch.FindString(line))
+	}
 
+	fmt.Println(links)
+	fmt.Println(cap(links))
+	fmt.Println(len(links))
+	//	一括でsliceの内容を書き込む
+	b := []byte{}
+	for _, line := range links {
+		ll := []byte(line)
+		for _, l := range ll {
+			b = append(b, l)
+		}
+	}
+
+	err = ioutil.WriteFile("viptext.slice.txt", b, 0666)
+	if err != nil {
+		fmt.Println(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	//	URL正規表現
