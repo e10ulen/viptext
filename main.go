@@ -176,8 +176,9 @@ func htmlParse() {
 	defer file.Close()
 
 	//	URL用正規表現
-	//rURL := regexp.MustCompile(`^\s+<dd>\s\!(.*)\\(.*)\s{2}(http.*[a-zA-Z0-9!-/:-@\[{-~_\\^\]])\s{2}(.*)\s<\/dd>$`)
-	ddsearch := regexp.MustCompile(`<dd>.*</dd>`)
+	//ddsearch := regexp.MustCompile(`^\s+<dd>\s\!(.*)\\(.*)\s{2}(http.*[a-zA-Z0-9!-/:-@\[{-~_\\^\]])\s{2}(.*)\s<\/dd>$`)
+	//ddsearch := regexp.MustCompile(`<dd>.*</dd>`)
+	ddsearch := regexp.MustCompile(`<dd>(.*)</dd>`)
 	//rURL, _ := regexp.Compile("https?://[\w/:%#\$&\?\(\)~\.=\+\-]+")
 	//regfile, err := os.Create(fileregexp)
 	//writer := bufio.NewWriter(regfile)
@@ -217,6 +218,7 @@ func htmlParse() {
 		fmt.Println(os.Stderr, err)
 		os.Exit(1)
 	}
+	log.Print("file Write")
 
 	//	URL正規表現
 	//	https?://[\w/:%#\$&\?\(\)~\.=\+\-]+
